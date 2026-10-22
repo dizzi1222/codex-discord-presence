@@ -6,6 +6,7 @@ import { dataDirectory, loadConfig, saveConfig } from './config.mjs';
 import { request } from './local-ipc.mjs';
 import { sanitizeHook, PresenceState } from './presence.mjs';
 import { DiscordRPC } from './discord-rpc.mjs';
+import { inspectCodexHooks } from './codex-hooks.mjs';
 
 const entry = fileURLToPath(import.meta.url);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -90,7 +91,8 @@ async function main(command, args) {
     const config = loadConfig(dir);
     const result = { node: process.version, platform: process.platform, configFile: join(dir, 'config.json'), configured: Boolean(config.clientId),
       showProject: config.showProject, showModel: config.showModel, enabled: config.enabled,
-      discord: 'not_checked', note: 'Hooks must be installed, enabled and trusted in Codex. Discord Activity Privacy must allow activity.' };
+      largeImage: config.largeImage || null, discord: 'not_checked', hooks: await inspectCodexHooks(),
+      note: 'Hooks must be installed, enabled and trusted in Codex. Discord Activity Privacy must allow activity.' };
     if (config.clientId) {
       const rpc = new DiscordRPC({ clientId: config.clientId, connectTimeoutMs: 500 });
       try { await rpc.connect(); result.discord = 'ready'; } catch { result.discord = 'unavailable'; }

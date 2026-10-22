@@ -17,12 +17,16 @@ El nombre principal de la tarjeta lo decide Discord a partir de tu Application I
 
 Necesitas Discord de escritorio abierto, Node.js 20 o posterior disponible como `node` y Codex con soporte para plugins y hooks locales. Discord en el navegador no proporciona el socket local requerido. En WSL, Codex remoto o un contenedor, el socket de Discord puede estar fuera del entorno y esta versión no instala un puente entre máquinas.
 
+Instala el runtime local desde este repositorio o desde el ZIP del [release](https://github.com/dizzi1222/codex-discord-presence/releases/latest). La copia guardada en tu cuenta o workspace permite acceder al complemento y sus instrucciones, pero **no carga los hooks locales en la versión de Codex comprobada**.
+
 ```sh
 git clone https://github.com/dizzi1222/codex-discord-presence.git
 cd codex-discord-presence
 codex plugin marketplace add .
 codex plugin add codex-discord-presence@codex-presence
 ```
+
+Si descargas `codex-discord-presence-0.1.1.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
 
 También puedes registrar directamente el repositorio:
 
@@ -31,7 +35,7 @@ codex plugin marketplace add dizzi1222/codex-discord-presence --ref main
 codex plugin add codex-discord-presence@codex-presence
 ```
 
-Abre la gestión de hooks de Codex, revisa `hooks/hooks.json` y marca sus comandos como confiables. Instalar o activar un plugin no concede confianza automáticamente. Abre una sesión nueva después de instalarlo para verificar los eventos desde el inicio.
+El runtime usa el manifiesto local `.codex-plugin/plugin.json` para cargar `hooks/hooks.json`. No añadas un `plugin.json` portable en la raíz de esta instalación: el runtime comprobado le da prioridad y no carga los hooks del manifiesto local. Ejecuta `node src/cli.mjs doctor` para comprobar lo que Codex carga realmente. Si Codex solicita revisar los hooks, utiliza su interfaz de confianza normal. Abre una sesión nueva después de instalar o actualizar el complemento.
 
 ## Configurar Discord
 
@@ -58,6 +62,18 @@ Activa en Discord la opción que permite mostrar tu actividad. Envía una tarea 
 node src/cli.mjs start
 node src/cli.mjs status
 ```
+
+## Imagen de la tarjeta
+
+Las nuevas configuraciones incluyen un logo PNG de 1024 × 1024 mediante una URL HTTPS pública del repositorio. Discord descarga esa imagen a través de su proxy; no necesita que subas el logo a tu aplicación. Los SVG `logo.svg` y `composer-icon.svg` son los iconos del listado del complemento, y `presence.png` es el asset de Discord.
+
+Una configuración existente con `largeImage` vacío conserva la imagen oculta. Para activar el logo incluido:
+
+```sh
+node src/cli.mjs configure --large-image https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/presence.png
+```
+
+`--large-image` también acepta la clave de un asset que hayas subido a tu aplicación en Discord o la URL pública de otra imagen. Un valor vacío desactiva la imagen. La imagen por defecto corresponde a `defaultLargeImage` en `src/config.mjs`.
 
 ## Estados y convivencia
 
@@ -86,11 +102,11 @@ El contador representa tiempo transcurrido desde que el proceso registra el inic
 | `node src/cli.mjs start` | Iniciar el proceso local. |
 | `node src/cli.mjs stop` | Retirar la presencia y detenerlo. |
 | `node src/cli.mjs status` | Ver el estado del proceso. |
-| `node src/cli.mjs doctor` | Revisar configuración y conectividad. |
+| `node src/cli.mjs doctor` | Revisar configuración, conectividad y hooks cargados por el runtime de Codex. |
 | `node src/cli.mjs preview` | Ver una tarjeta de ejemplo con tus preferencias, sin publicarla. |
 | `node src/cli.mjs hook` | Entrada JSON interna de los hooks; responde `{}` y termina sin bloquear Codex. |
 
-Preferencias: `--client-id`, `--show-project true|false`, `--show-model true|false`, `--idle-mode clear|show` y `--language es|en`.
+Preferencias: `--client-id`, `--show-project true|false`, `--show-model true|false`, `--idle-mode clear|show`, `--language es|en` y `--large-image`.
 
 `CODEX_DISCORD_CLIENT_ID` permite proporcionar el Application ID mediante el entorno. `CODEX_DISCORD_DATA_DIR` permite elegir otro directorio de datos: debe ser el mismo para el comando de configuración y para los hooks. Las rutas predeterminadas son `%LOCALAPPDATA%/codex-discord-presence` en Windows, `~/Library/Application Support/codex-discord-presence` en macOS y `$XDG_CONFIG_HOME/codex-discord-presence` o `~/.config/codex-discord-presence` en Linux.
 
@@ -105,16 +121,17 @@ El proceso mantiene una conexión IPC local con Discord, agrupa las actualizacio
 1. Ejecuta `node --version` y `node src/cli.mjs doctor`.
 2. Comprueba el Application ID y que Discord de escritorio esté abierto en el mismo sistema.
 3. Verifica la configuración de actividad de Discord.
-4. Comprueba que el plugin esté activo y que hayas revisado y confiado sus hooks en Codex. Abre una sesión nueva y envía un mensaje.
-5. Revisa `node src/cli.mjs status`. En modo `clear`, que la tarjeta desaparezca al terminar el turno es el comportamiento esperado.
+4. Revisa el diagnóstico de hooks de `doctor`. Si el runtime carga cero hooks, comprueba que instalaste el runtime local y que la carpeta usa `.codex-plugin/plugin.json` sin un `plugin.json` portable en la raíz. Una instalación activa o una habilidad disponible no prueban que Codex haya cargado los hooks.
+5. Si Codex requiere revisar los hooks, revísalos en su interfaz normal. Abre una sesión nueva y envía un mensaje. `sessions: 0` sólo significa que el proceso no conserva sesiones recibidas; por sí solo no demuestra un problema de confianza.
+6. Revisa `node src/cli.mjs status`. Durante el trabajo debe aparecer una actividad. En modo `clear`, que la tarjeta desaparezca al terminar el turno es el comportamiento esperado. Si hay actividad sin imagen, revisa `largeImage` y que su URL sea pública o su clave pertenezca a la aplicación de Discord configurada.
 
 Para detenerlo manualmente, usa `node src/cli.mjs stop`. No es necesario cerrar Discord ni desactivar otras aplicaciones de presencia.
 
 ## GitHub, workspace y distribución
 
-El repositorio incluye un marketplace de Codex y el paquete portable `plugin.json`, además del manifiesto de compatibilidad. Un ZIP para guardar el plugin en una cuenta debe contener únicamente un plugin y excluir el marketplace, `.git` y los datos del usuario.
+El repositorio y el ZIP de release incluyen el runtime local con `.codex-plugin/plugin.json`, los hooks y el catálogo de instalación de Codex. Se distribuyen sin `plugin.json` portable en la raíz para que la versión comprobada de Codex cargue los hooks. El paquete para guardar el complemento en una cuenta es independiente: usa el formato portable y excluye el marketplace, `.git` y los datos del usuario.
 
-Guardar el paquete con Plugin Creator en el workspace crea un plugin privado cuando hay un workspace activo. Para permitir acceso a otros miembros, utiliza los controles de compartir o publicar del workspace con los roles adecuados; la creación privada por sí sola no demuestra acceso para todos. Cada usuario necesita instalar los archivos localmente y configurar su propia aplicación de Discord. Subir el paquete desde la web no despliega el proceso en su ordenador.
+Guardar el paquete con Plugin Creator en el workspace crea un plugin privado cuando hay un workspace activo. Para permitir acceso a otros miembros, utiliza los controles de compartir o publicar del workspace con los roles adecuados; la creación privada por sí sola no demuestra acceso para todos. Cada usuario necesita instalar el runtime local desde este repositorio o release y configurar su propia aplicación de Discord. Subir el paquete desde la web no despliega el proceso ni garantiza que sus hooks estén disponibles en Codex.
 
 Esta distribución en GitHub y workspace no equivale a publicar en el directorio público de OpenAI. La documentación actual reserva los plugins con hooks para instalación manual local y no admite esos hooks en el directorio público.
 
@@ -133,5 +150,6 @@ Inspirado por la convivencia entre aplicaciones de [opencode-discord-rpc](https:
 - [Hooks de Codex](https://learn.chatgpt.com/docs/hooks)
 - [Paquetes y marketplaces de plugins](https://developers.openai.com/plugins/build/plugins)
 - [Discord RPC](https://docs.discord.com/developers/topics/rpc)
+- [Imágenes de actividad de Discord](https://docs.discord.com/developers/events/gateway-events#activity-object-activity-asset-image)
 
 Proyecto comunitario independiente. Licencia [MIT](LICENSE).

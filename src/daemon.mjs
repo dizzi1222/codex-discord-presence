@@ -32,6 +32,7 @@ export async function runDaemon({ dir = dataDirectory(), rpcFactory = options =>
   const state = new PresenceState();
   let rpc = null, clientId = '', lastError = null;
   let shuttingDown = false, running = false, lastSent = '', lastSentAt = 0, nextConnectAt = 0, backoff = 1000;
+  let lastEventAt = null, lastEvent = null;
   const sockets = new Set();
   async function tick() {
     if (running || shuttingDown) return;
@@ -91,11 +92,12 @@ export async function runDaemon({ dir = dataDirectory(), rpcFactory = options =>
           if (!event || !events.has(event.event) || typeof event.sessionId !== 'string' || event.sessionId.length > 200) throw new Error('Invalid event');
           state.accept({ event: event.event, sessionId: event.sessionId,
             project: config.showProject ? event.project : '', model: config.showModel ? event.model : '' });
+          lastEventAt = Date.now(); lastEvent = event.event;
           socket.end('{"ok":true}\n'); void tick();
         } else if (message.action === 'status') {
           socket.end(JSON.stringify({ ok: true, pid: process.pid, connected: Boolean(rpc?.connected), configured: Boolean(config.clientId),
             published: Boolean(rpc?.connected && lastSent && lastSent !== 'null'), lastPublishedAt: lastSentAt || null,
-            enabled: config.enabled, sessions: state.sessions.size, activity: state.activity(config), lastError }) + '\n');
+            enabled: config.enabled, sessions: state.sessions.size, activity: state.activity(config), lastEventAt, lastEvent, lastError }) + '\n');
         } else if (message.action === 'stop') { socket.end('{"ok":true}\n'); setTimeout(() => void stop(), 30); }
         else socket.end('{"ok":false,"error":"Unknown action"}\n');
       } catch { socket.end('{"ok":false,"error":"Invalid request"}\n'); }

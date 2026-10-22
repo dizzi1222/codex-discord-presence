@@ -1,13 +1,16 @@
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, relative, isAbsolute, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const manifest = JSON.parse(readFileSync(join(root, 'plugin.json'), 'utf8'));
+// Codex 0.163 skips lifecycle hooks in the portable Agent Plugins format.
+// Keep the local install and release in the supported Codex compatibility format.
+if (existsSync(join(root, 'plugin.json'))) throw new Error('A portable plugin.json disables lifecycle hooks in this Codex runtime. Use .codex-plugin/plugin.json.');
+const manifest = JSON.parse(readFileSync(join(root, '.codex-plugin', 'plugin.json'), 'utf8'));
 const output = resolve(process.argv[2] || join(root, '..', `${manifest.name}-${manifest.version}.zip`));
 const outputRelative = relative(root, output);
 if (!isAbsolute(outputRelative) && outputRelative !== '..' && !outputRelative.startsWith('..' + sep)) throw new Error('Write the archive outside the plugin directory.');
-const excluded = new Set(['.git', '.agents', '.github', 'node_modules', 'coverage']);
+const excluded = new Set(['.git', '.github', 'node_modules', 'coverage']);
 const table = Array.from({ length: 256 }, (_, n) => {
   let crc = n; for (let k = 0; k < 8; k++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0); return crc >>> 0;
 });

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaults, validateConfig } from '../src/config.mjs';
+import { defaultLargeImage, defaults, validateConfig } from '../src/config.mjs';
 import { PresenceState, sanitizeHook } from '../src/presence.mjs';
 
 test('privacy allowlist discards prompts, paths, tools and transcript, explicit names only', () => {
@@ -14,7 +14,7 @@ test('session lifecycle yields on stop and end; timestamps survive state changes
   state.accept({ event: 'SessionStart', sessionId: 'one', project: 'repo', model: 'GPT-6' }, 10000);
   assert.equal(state.activity(config, 10000), null);
   state.accept({ event: 'UserPromptSubmit', sessionId: 'one' }, 12000);
-  assert.deepEqual(state.activity(config, 12000), { type: 0, details: 'repo', state: 'GPT-6 · Pensando', timestamps: { start: 10 } });
+  assert.deepEqual(state.activity(config, 12000), { type: 0, details: 'repo', state: 'GPT-6 · Pensando', timestamps: { start: 10 }, assets: { large_image: defaultLargeImage, large_text: 'Codex Discord Presence' } });
   state.accept({ event: 'PreToolUse', sessionId: 'one' }, 13000);
   assert.equal(state.activity(config, 13000).timestamps.start, 10);
   state.accept({ event: 'Stop', sessionId: 'one' }, 14000);
@@ -34,4 +34,16 @@ test('configuration rejects invalid identities and settings', () => {
   assert.throws(() => validateConfig({ showProject: 'true' }));
   assert.throws(() => validateConfig({ updateIntervalMs: 1 }));
   assert.equal(validateConfig({ clientId: '123456789012345678' }).enabled, true);
+});
+
+test('presence uses the bundled public artwork by default and honors custom or hidden images', () => {
+  const state = new PresenceState();
+  state.accept({ event: 'UserPromptSubmit', sessionId: 'one' }, 10000);
+  assert.equal(state.activity(validateConfig({}), 10000).assets.large_image, defaultLargeImage);
+  assert.equal(state.activity(validateConfig({ largeImage: 'my-application-logo' }), 10000).assets.large_image, 'my-application-logo');
+  const imageUrl = 'https://example.com/custom-logo.png';
+  assert.equal(state.activity(validateConfig({ largeImage: imageUrl }), 10000).assets.large_image, imageUrl);
+  assert.equal('assets' in state.activity(validateConfig({ largeImage: '' }), 10000), false);
+  assert.throws(() => validateConfig({ largeImage: 'x'.repeat(301) }));
+  assert.throws(() => validateConfig({ largeImage: 'logo\nkey' }));
 });

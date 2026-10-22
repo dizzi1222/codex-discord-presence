@@ -3,10 +3,14 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 
+// Discord fetches this public PNG through its image proxy. Bundled SVGs are
+// plugin-listing artwork; they cannot be used as local Rich Presence images.
+export const defaultLargeImage = 'https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/presence.png';
+
 export const defaults = Object.freeze({
   clientId: '', enabled: true, showProject: false, showModel: false,
   idleMode: 'clear', language: 'es', updateIntervalMs: 15000,
-  staleAfterMs: 15 * 60 * 1000, largeImage: '',
+  staleAfterMs: 15 * 60 * 1000, largeImage: defaultLargeImage,
 });
 
 export function dataDirectory(env = process.env, platform = process.platform) {
@@ -25,7 +29,7 @@ export function validateConfig(config) {
   if (!['es', 'en'].includes(value.language)) throw new Error('language must be es or en.');
   if (!Number.isInteger(value.updateIntervalMs) || value.updateIntervalMs < 1000 || value.updateIntervalMs > 60000) throw new Error('updateIntervalMs must be 1000–60000.');
   if (!Number.isInteger(value.staleAfterMs) || value.staleAfterMs < 60000 || value.staleAfterMs > 86400000) throw new Error('staleAfterMs must be 60000–86400000.');
-  if (typeof value.largeImage !== 'string' || value.largeImage.length > 256) throw new Error('largeImage must be a Discord asset key.');
+  if (typeof value.largeImage !== 'string' || value.largeImage.length > 300 || /[\u0000-\u001f\u007f]/.test(value.largeImage)) throw new Error('largeImage must be a Discord asset key or public image URL (up to 300 characters), or empty to hide the image.');
   return value;
 }
 
