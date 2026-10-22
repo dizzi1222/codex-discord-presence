@@ -26,6 +26,15 @@ test('local release preserves runtime hook loading and contains an installable m
   assert.equal(entries.has(prefix + 'plugin.json'), false, 'portable manifests cause Codex to skip lifecycle hooks');
   const manifest = JSON.parse(entries.get(prefix + '.codex-plugin/plugin.json'));
   assert.equal(manifest.hooks, './hooks/hooks.json');
+  for (const key of ['logo', 'composerIcon']) {
+    const path = manifest.interface[key];
+    assert.match(path, /^\.\/assets\/[^/]+\.png$/, `${key} uses a portable raster listing image`);
+    const body = entries.get(prefix + path.slice(2));
+    assert.ok(body, `${key} image is included in the release`);
+    assert.deepEqual(body.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    assert.equal(body.readUInt32BE(16), body.readUInt32BE(20), `${key} image is square`);
+    assert.ok(body.readUInt32BE(16) >= 48, `${key} image meets the listing's minimum dimensions`);
+  }
   const hooks = JSON.parse(entries.get(prefix + 'hooks/hooks.json'));
   assert.equal(Object.keys(hooks.hooks).length, 7);
   const marketplace = JSON.parse(entries.get(prefix + '.agents/plugins/marketplace.json'));

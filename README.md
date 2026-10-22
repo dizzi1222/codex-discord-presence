@@ -26,7 +26,9 @@ codex plugin marketplace add .
 codex plugin add codex-discord-presence@codex-presence
 ```
 
-Si descargas `codex-discord-presence-0.1.2.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
+Si descargas `codex-discord-presence-0.1.3.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
+
+En el listado puedes ver dos fuentes: **Codex Discord Presence**, de la fuente local Codex Presence y autor dizzi1222, ejecuta la presencia en este equipo; **Codex Discord Presence (Guía)** es la copia de tu cuenta con las instrucciones. Son distribuciones de la misma integración, no una versión antigua y otra nueva. La presencia sólo requiere el runtime local.
 
 También puedes registrar directamente el repositorio:
 
@@ -73,7 +75,7 @@ node src/cli.mjs status
 
 ## Imagen de la tarjeta
 
-Las nuevas configuraciones incluyen el icono oficial de ChatGPT, un PNG de 1024 × 1024 copiado sin modificaciones del [OpenAI Help Center](https://help.openai.com/es-419/articles/7905742-what-does-the-official-chatgpt-ios-app-icon-look-like). Discord descarga `assets/chatgpt-official.png` mediante una URL HTTPS pública del repositorio y su proxy de imágenes; no necesita que subas el logo a tu aplicación. El listado del complemento conserva su identidad propia con `logo.svg` y `composer-icon.svg`. La fuente y atribución están en [assets](assets/README.md); el logotipo pertenece a OpenAI y este proyecto es independiente.
+Las nuevas configuraciones incluyen el icono oficial de ChatGPT, un PNG de 1024 × 1024 copiado sin modificaciones del [OpenAI Help Center](https://help.openai.com/es-419/articles/7905742-what-does-the-official-chatgpt-ios-app-icon-look-like). Discord descarga `assets/chatgpt-official.png` mediante una URL HTTPS pública del repositorio y su proxy de imágenes; no necesita que subas el logo a tu aplicación. El listado del complemento conserva su identidad propia con `logo.png` y `composer-icon.png`; los SVG originales siguen incluidos. La fuente y atribución están en [assets](assets/README.md); el logotipo pertenece a OpenAI y este proyecto es independiente.
 
 Una configuración existente con `largeImage` vacío conserva la imagen oculta. Para activar el logo incluido:
 
