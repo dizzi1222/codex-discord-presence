@@ -5,8 +5,9 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { dataDirectory, loadConfig, localEndpoint } from './config.mjs';
 import { PresenceState, events } from './presence.mjs';
 import { DiscordRPC } from './discord-rpc.mjs';
+import { readSessionTitle } from './codex-metadata.mjs';
 
-export async function runDaemon({ dir = dataDirectory(), rpcFactory = options => new DiscordRPC(options) } = {}) {
+export async function runDaemon({ dir = dataDirectory(), rpcFactory = options => new DiscordRPC(options), titleResolver = readSessionTitle } = {}) {
   let config = loadConfig(dir);
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   const lockPath = join(dir, 'daemon.lock');
@@ -33,12 +34,25 @@ export async function runDaemon({ dir = dataDirectory(), rpcFactory = options =>
   let rpc = null, clientId = '', lastError = null;
   let shuttingDown = false, running = false, lastSent = '', lastSentAt = 0, nextConnectAt = 0, backoff = 1000;
   let lastEventAt = null, lastEvent = null;
+  const titleChecks = new Map();
+  function refreshSessionTitle() {
+    if (!config.enabled || !config.showSession || shuttingDown) return;
+    const item = state.current(config);
+    if (!item || Date.now() - (titleChecks.get(item.id) ?? -Infinity) < 30000) return;
+    titleChecks.set(item.id, Date.now());
+    if (titleChecks.size > 100) titleChecks.delete(titleChecks.keys().next().value);
+    void Promise.resolve().then(() => titleResolver(item.id)).then(title => {
+      if (!shuttingDown && config.showSession && typeof title === 'string') { state.setSessionTitle(item.id, title); void tick(); }
+    }).catch(() => {});
+  }
   const sockets = new Set();
   async function tick() {
     if (running || shuttingDown) return;
     running = true;
     try {
       config = loadConfig(dir);
+      if (!config.showSession) { for (const item of state.sessions.values()) item.sessionTitle = ''; titleChecks.clear(); }
+      refreshSessionTitle();
       let activity = state.activity(config);
       if (rpc && (clientId !== config.clientId || !config.enabled)) {
         try { if (rpc.connected) await rpc.clearActivity(); } catch {}

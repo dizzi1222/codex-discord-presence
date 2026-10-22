@@ -2,12 +2,12 @@
 
 ![Icono de Codex Discord Presence](assets/icon.svg)
 
-Discord Rich Presence para Codex de escritorio y sesiones locales. Muestra cuándo Codex está trabajando, pensando o esperando tu siguiente mensaje; permite añadir el proyecto y el modelo. Node.js 20+, sin dependencias de ejecución ni compilación.
+Discord Rich Presence para Codex de escritorio y sesiones locales. Muestra cuándo Codex está trabajando, pensando o esperando tu siguiente mensaje; permite añadir el nombre del chat, el proyecto y el modelo. Node.js 20+, sin dependencias de ejecución ni compilación.
 
 ```text
 Codex                               ← nombre de tu aplicación de Discord
-mi-proyecto                         ← proyecto opcional
-gpt-6.1-sol · Usando herramientas    ← modelo y estado
+Mi chat actual                      ← nombre de sesión opcional
+mi-proyecto · gpt-6.1-sol · Pensando  ← proyecto, modelo y estado
 00:12 transcurridos                  ← tiempo desde el inicio de la sesión
 ```
 
@@ -26,7 +26,7 @@ codex plugin marketplace add .
 codex plugin add codex-discord-presence@codex-presence
 ```
 
-Si descargas `codex-discord-presence-0.1.1.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
+Si descargas `codex-discord-presence-0.1.2.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
 
 También puedes registrar directamente el repositorio:
 
@@ -54,6 +54,14 @@ El ejemplo muestra el proyecto y el modelo. Si prefieres ocultarlos:
 node src/cli.mjs configure --show-project false --show-model false
 ```
 
+Para mostrar el nombre del chat actual en la primera línea, conservando proyecto y modelo en la segunda:
+
+```sh
+node src/cli.mjs configure --show-session true --show-project true --show-model true
+```
+
+El nombre se obtiene del título guardado en Codex mediante metadatos locales. Los cambios de nombre se actualizan en hasta 30 segundos. Si aún no existe un título, la tarjeta conserva el proyecto como primera línea. El complemento nunca usa el prompt como alternativa al título.
+
 Los valores predeterminados del paquete ocultan ambos campos. La configuración del usuario se guarda fuera del repositorio, en el directorio de datos del complemento, y se comparte con su copia instalada. No publiques archivos de configuración personal.
 
 Activa en Discord la opción que permite mostrar tu actividad. Envía una tarea en Codex; los hooks arrancan el proceso local y actualizan la tarjeta. `start` inicia el proceso sin inventar actividad de una sesión:
@@ -65,15 +73,15 @@ node src/cli.mjs status
 
 ## Imagen de la tarjeta
 
-Las nuevas configuraciones incluyen un logo PNG de 1024 × 1024 mediante una URL HTTPS pública del repositorio. Discord descarga esa imagen a través de su proxy; no necesita que subas el logo a tu aplicación. Los SVG `logo.svg` y `composer-icon.svg` son los iconos del listado del complemento, y `presence.png` es el asset de Discord.
+Las nuevas configuraciones incluyen el icono oficial de ChatGPT, un PNG de 1024 × 1024 copiado sin modificaciones del [OpenAI Help Center](https://help.openai.com/es-419/articles/7905742-what-does-the-official-chatgpt-ios-app-icon-look-like). Discord descarga `assets/chatgpt-official.png` mediante una URL HTTPS pública del repositorio y su proxy de imágenes; no necesita que subas el logo a tu aplicación. El listado del complemento conserva su identidad propia con `logo.svg` y `composer-icon.svg`. La fuente y atribución están en [assets](assets/README.md); el logotipo pertenece a OpenAI y este proyecto es independiente.
 
 Una configuración existente con `largeImage` vacío conserva la imagen oculta. Para activar el logo incluido:
 
 ```sh
-node src/cli.mjs configure --large-image https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/presence.png
+node src/cli.mjs configure --large-image https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/chatgpt-official.png
 ```
 
-`--large-image` también acepta la clave de un asset que hayas subido a tu aplicación en Discord o la URL pública de otra imagen. Un valor vacío desactiva la imagen. La imagen por defecto corresponde a `defaultLargeImage` en `src/config.mjs`.
+`--large-image` también acepta la clave de un asset que hayas subido a tu aplicación en Discord o la URL pública de otra imagen. Un valor vacío desactiva la imagen. La imagen por defecto corresponde a `defaultLargeImage` en `src/config.mjs`; `assets/presence.png` conserva el icono propio como alternativa.
 
 ## Estados y convivencia
 
@@ -106,7 +114,7 @@ El contador representa tiempo transcurrido desde que el proceso registra el inic
 | `node src/cli.mjs preview` | Ver una tarjeta de ejemplo con tus preferencias, sin publicarla. |
 | `node src/cli.mjs hook` | Entrada JSON interna de los hooks; responde `{}` y termina sin bloquear Codex. |
 
-Preferencias: `--client-id`, `--show-project true|false`, `--show-model true|false`, `--idle-mode clear|show`, `--language es|en` y `--large-image`.
+Preferencias: `--client-id`, `--show-project true|false`, `--show-model true|false`, `--show-session true|false`, `--idle-mode clear|show`, `--language es|en` y `--large-image`.
 
 `CODEX_DISCORD_CLIENT_ID` permite proporcionar el Application ID mediante el entorno. `CODEX_DISCORD_DATA_DIR` permite elegir otro directorio de datos: debe ser el mismo para el comando de configuración y para los hooks. Las rutas predeterminadas son `%LOCALAPPDATA%/codex-discord-presence` en Windows, `~/Library/Application Support/codex-discord-presence` en macOS y `$XDG_CONFIG_HOME/codex-discord-presence` o `~/.config/codex-discord-presence` en Linux.
 

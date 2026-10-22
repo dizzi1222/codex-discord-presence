@@ -31,11 +31,11 @@ class FakeRPC extends EventEmitter {
   disconnect() { this.connected = false; this.emit('disconnected'); }
 }
 
-async function fixture(t, overrides = {}) {
+async function fixture(t, overrides = {}, dependencies = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'codex-daemon-test-'));
   const config = saveConfig({ clientId: CLIENT_ID, updateIntervalMs: 1000, ...overrides }, dir);
   const clients = [];
-  const daemon = await runDaemon({ dir, rpcFactory: () => { const rpc = new FakeRPC(); clients.push(rpc); return rpc; } });
+  const daemon = await runDaemon({ dir, rpcFactory: () => { const rpc = new FakeRPC(); clients.push(rpc); return rpc; }, ...dependencies });
   t.after(async () => { await daemon?.stop(); rmSync(dir, { recursive: true, force: true }); });
   const send = async (event, sessionId = 'chat-one', extras = {}) => {
     await request({ action: 'event', event: { event, sessionId, ...extras } }, { dir });
@@ -133,6 +133,31 @@ test('default privacy settings discard names supplied directly to the daemon', a
   assert.equal(daemon.state.sessions.get('safe-session').project, '');
   assert.equal(daemon.state.sessions.get('safe-session').model, '');
   assert.doesNotMatch(JSON.stringify(status), /private-/);
+});
+
+test('opted-in session titles use local metadata and keep project, model and lifecycle state', async t => {
+  const advance = virtualClock(t), queried = [];
+  const { send, daemon, clients, dir } = await fixture(t, { showSession: true, showProject: true, showModel: true }, {
+    titleResolver: async id => { queried.push(id); return 'My current chat'; },
+  });
+  await send('UserPromptSubmit', 'named-chat', { project: 'my-project', model: 'my-model' });
+  await turn(); advance(1100); await daemon.tick();
+  assert.equal(clients[0].activities.at(-1).details, 'My current chat');
+  assert.equal(clients[0].activities.at(-1).state, 'my-project · my-model · Pensando');
+  assert.deepEqual(queried, ['named-chat']);
+  await send('Stop', 'named-chat');
+  assert.equal(clients[0].activities.at(-1), null);
+  const status = await request({ action: 'status' }, { dir });
+  assert.equal(status.lastEvent, 'Stop');
+  assert.equal(typeof status.lastEventAt, 'number');
+});
+
+test('default session privacy performs no metadata reads and ignores IPC-supplied titles', async t => {
+  let queried = false;
+  const { send, clients } = await fixture(t, {}, { titleResolver: async () => { queried = true; return 'private-title'; } });
+  await send('UserPromptSubmit', 'private-chat', { sessionTitle: 'private-title', preview: 'private-prompt' });
+  assert.equal(queried, false);
+  assert.doesNotMatch(JSON.stringify(clients[0].activities), /private-/);
 });
 
 test('stop clears presence, closes RPC and removes authentication and lock files', async t => {

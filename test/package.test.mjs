@@ -32,5 +32,6 @@ test('local release preserves runtime hook loading and contains an installable m
   assert.equal(marketplace.plugins[0].source.path, './');
   assert.equal(marketplace.plugins[0].name, manifest.name);
   assert.deepEqual(entries.get(prefix + 'assets/presence.png').subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  assert.deepEqual(entries.get(prefix + 'assets/chatgpt-official.png').subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   assert.equal(JSON.parse(entries.get(prefix + 'package.json')).version, manifest.version);
 });

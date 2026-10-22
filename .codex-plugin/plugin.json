@@ -1,6 +1,6 @@
 {
   "name": "codex-discord-presence",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local Discord Rich Presence for Codex, driven by lifecycle hooks with private defaults.",
   "author": { "name": "dizzi1222", "url": "https://github.com/dizzi1222" },
   "skills": "./skills/",

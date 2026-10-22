@@ -12,7 +12,10 @@ Los hooks reciben los eventos de Codex por entrada estándar. El complemento sel
 | Tiempo transcurrido de sesión | Incluido en la presencia. |
 | Proyecto | Oculto de forma predeterminada; si lo activas, usa el nombre de carpeta. |
 | Modelo | Oculto de forma predeterminada; si lo activas, usa el identificador del modelo de Codex. |
+| Nombre de sesión | Oculto de forma predeterminada; si lo activas, publica el título de la conversación. |
 | Ruta completa, prompts, código y argumentos de herramientas | No se incluyen en la presencia. |
+
+`--show-session true` permite incluir el nombre de la sesión. Para obtenerlo, el complemento consulta los metadatos locales de la conversación con `thread/read` y `includeTurns: false`, y selecciona únicamente `thread.name`. No lee los turnos para construir un título ni usa `preview`, el primer prompt u otro contenido como alternativa. El nombre se limita y limpia antes de enviarlo a Discord. Un título elegido por el usuario puede contener información privada: esta opción sólo se activa cuando el usuario solicita mostrarlo.
 
 El nombre principal de la actividad lo determina la aplicación de Discord que corresponda al Application ID configurado. Ese identificador no es un token de autenticación. No introduzcas un token de bot o usuario, una contraseña ni una API key de OpenAI en su lugar.
 
@@ -20,7 +23,7 @@ El nombre principal de la actividad lo determina la aplicación de Discord que c
 
 Las preferencias y los datos necesarios para controlar el proceso se guardan en el directorio de datos del usuario; `CODEX_DISCORD_DATA_DIR` permite cambiarlo. La configuración debe permanecer fuera del repositorio y del ZIP compartido.
 
-Puedes ocultar proyecto y modelo con `configure --show-project false --show-model false`, retirar la actividad y detener el proceso con `stop`, o desinstalar el plugin y eliminar su directorio de datos después de detenerlo. Desactivar el plugin evita futuros hooks; detener el proceso retira la presencia actual.
+Puedes ocultar proyecto, modelo y nombre de sesión con `configure --show-project false --show-model false --show-session false`, retirar la actividad y detener el proceso con `stop`, o desinstalar el plugin y eliminar su directorio de datos después de detenerlo. Desactivar el plugin evita futuros hooks; detener el proceso retira la presencia actual.
 
 No pegues conversaciones ni credenciales en un issue para diagnosticar la presencia. Comparte únicamente el error necesario y oculta nombres de proyectos si son privados.
 

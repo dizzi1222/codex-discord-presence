@@ -56,10 +56,10 @@ async function main(command, args) {
   if (command === 'daemon') { const { runDaemon } = await import('./daemon.mjs'); await runDaemon({ dir }); return; }
   if (command === 'configure') {
     const flags = options(args), next = loadConfig(dir);
-    const fields = { 'client-id': 'clientId', 'show-project': 'showProject', 'show-model': 'showModel', 'idle-mode': 'idleMode', language: 'language', enabled: 'enabled', 'large-image': 'largeImage', 'update-interval': 'updateIntervalMs', 'stale-after': 'staleAfterMs' };
+    const fields = { 'client-id': 'clientId', 'show-project': 'showProject', 'show-model': 'showModel', 'show-session': 'showSession', 'idle-mode': 'idleMode', language: 'language', enabled: 'enabled', 'large-image': 'largeImage', 'update-interval': 'updateIntervalMs', 'stale-after': 'staleAfterMs' };
     for (const [key, value] of Object.entries(flags)) {
       if (!fields[key]) throw new Error('Unknown option: --' + key);
-      if (['show-project', 'show-model', 'enabled'].includes(key)) {
+      if (['show-project', 'show-model', 'show-session', 'enabled'].includes(key)) {
         if (!['true', 'false'].includes(value)) throw new Error('--' + key + ' expects true or false.');
         next[fields[key]] = value === 'true';
       } else if (['update-interval', 'stale-after'].includes(key)) next[fields[key]] = Number(value);
@@ -90,7 +90,7 @@ async function main(command, args) {
   if (command === 'doctor') {
     const config = loadConfig(dir);
     const result = { node: process.version, platform: process.platform, configFile: join(dir, 'config.json'), configured: Boolean(config.clientId),
-      showProject: config.showProject, showModel: config.showModel, enabled: config.enabled,
+      showProject: config.showProject, showModel: config.showModel, showSession: config.showSession, enabled: config.enabled,
       largeImage: config.largeImage || null, discord: 'not_checked', hooks: await inspectCodexHooks(),
       note: 'Hooks must be installed, enabled and trusted in Codex. Discord Activity Privacy must allow activity.' };
     if (config.clientId) {

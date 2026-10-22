@@ -34,6 +34,7 @@ export class PresenceState {
       updatedAt: now, sequence: ++this.sequence, state,
       project: safeText(event.project) || previous?.project || '',
       model: safeText(event.model) || previous?.model || '',
+      sessionTitle: previous?.sessionTitle || '',
     };
     this.sessions.set(event.sessionId, item);
     // Keep memory bounded even if the host never delivers SessionEnd.
@@ -45,16 +46,21 @@ export class PresenceState {
     const active = all.filter(item => item.state === 'thinking' || item.state === 'working');
     return (active.length ? active : all).sort((a, b) => b.sequence - a.sequence)[0] || null;
   }
+  setSessionTitle(sessionId, title) {
+    const item = this.sessions.get(sessionId);
+    if (item) item.sessionTitle = safeText(title, 128);
+  }
   activity(config, now = Date.now()) {
     const item = this.current(config, now);
     if (!item || (config.idleMode === 'clear' && ['waiting', 'paused'].includes(item.state))) return null;
     const labels = config.language === 'en'
       ? { thinking: 'Thinking', working: 'Using tools', waiting: 'Waiting for input', paused: 'Paused' }
       : { thinking: 'Pensando', working: 'Usando herramientas', waiting: 'Esperando instrucciones', paused: 'En pausa' };
+    const title = config.showSession ? item.sessionTitle : '';
     const activity = {
       type: 0,
-      details: config.showProject && item.project ? item.project : 'Codex',
-      state: safeText([config.showModel ? item.model : '', labels[item.state]].filter(Boolean).join(' · '), 128),
+      details: title || (config.showProject && item.project ? item.project : 'Codex'),
+      state: safeText([title && config.showProject ? safeText(item.project, 40) : '', config.showModel ? safeText(item.model, 40) : '', labels[item.state]].filter(Boolean).join(' · '), 128),
       timestamps: { start: Math.floor(item.startedAt / 1000) },
     };
     if (config.largeImage) activity.assets = { large_image: config.largeImage, large_text: 'Codex Discord Presence' };

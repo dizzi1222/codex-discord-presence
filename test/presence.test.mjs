@@ -32,8 +32,21 @@ test('idle sessions do not overwrite another active chat; stale activity expires
 test('configuration rejects invalid identities and settings', () => {
   assert.throws(() => validateConfig({ clientId: '123' }));
   assert.throws(() => validateConfig({ showProject: 'true' }));
+  assert.throws(() => validateConfig({ showSession: 'true' }));
   assert.throws(() => validateConfig({ updateIntervalMs: 1 }));
   assert.equal(validateConfig({ clientId: '123456789012345678' }).enabled, true);
+});
+
+test('session titles are opt-in, bounded and cannot replace the active chat through late metadata', () => {
+  const state = new PresenceState();
+  state.accept({ event: 'UserPromptSubmit', sessionId: 'one', project: 'first', model: 'model-one' }, 10000);
+  state.accept({ event: 'UserPromptSubmit', sessionId: 'two', project: 'second', model: 'model-two' }, 10001);
+  state.setSessionTitle('two', 'Current\nchat');
+  state.setSessionTitle('one', 'Older chat');
+  assert.equal(state.activity({ ...defaults, showSession: true }, 10002).details, 'Current chat');
+  assert.equal(state.activity(defaults, 10002).details, 'Codex');
+  state.setSessionTitle('two', 'x'.repeat(150));
+  assert.equal(state.activity({ ...defaults, showSession: true }, 10002).details.length, 128);
 });
 
 test('presence uses the bundled public artwork by default and honors custom or hidden images', () => {

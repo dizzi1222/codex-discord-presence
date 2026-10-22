@@ -5,10 +5,10 @@ import { createHash, randomBytes } from 'node:crypto';
 
 // Discord fetches this public PNG through its image proxy. Bundled SVGs are
 // plugin-listing artwork; they cannot be used as local Rich Presence images.
-export const defaultLargeImage = 'https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/presence.png';
+export const defaultLargeImage = 'https://raw.githubusercontent.com/dizzi1222/codex-discord-presence/main/assets/chatgpt-official.png';
 
 export const defaults = Object.freeze({
-  clientId: '', enabled: true, showProject: false, showModel: false,
+  clientId: '', enabled: true, showProject: false, showModel: false, showSession: false,
   idleMode: 'clear', language: 'es', updateIntervalMs: 15000,
   staleAfterMs: 15 * 60 * 1000, largeImage: defaultLargeImage,
 });
@@ -24,7 +24,7 @@ export function validateConfig(config) {
   const value = { ...defaults };
   for (const key of Object.keys(defaults)) if (config[key] !== undefined) value[key] = config[key];
   if (typeof value.clientId !== 'string' || (value.clientId && !/^\d{17,20}$/.test(value.clientId))) throw new Error('clientId must be a Discord Application ID (17–20 digits).');
-  for (const key of ['enabled', 'showProject', 'showModel']) if (typeof value[key] !== 'boolean') throw new Error(`${key} must be boolean.`);
+  for (const key of ['enabled', 'showProject', 'showModel', 'showSession']) if (typeof value[key] !== 'boolean') throw new Error(`${key} must be boolean.`);
   if (!['clear', 'show'].includes(value.idleMode)) throw new Error('idleMode must be clear or show.');
   if (!['es', 'en'].includes(value.language)) throw new Error('language must be es or en.');
   if (!Number.isInteger(value.updateIntervalMs) || value.updateIntervalMs < 1000 || value.updateIntervalMs > 60000) throw new Error('updateIntervalMs must be 1000–60000.');
