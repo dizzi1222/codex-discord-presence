@@ -1,0 +1,12 @@
+{
+  "name": "codex-presence",
+  "interface": { "displayName": "Codex Presence" },
+  "plugins": [
+    {
+      "name": "codex-discord-presence",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

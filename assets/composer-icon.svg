@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 256 256" role="img" aria-label="Codex Discord Presence">
+  <rect width="256" height="256" rx="56" fill="#171928"/>
+  <path d="M66 91 91 114 66 137M107 142h25l16-34 19 66 14-32h18" fill="none" stroke="#63E6B4" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="199" cy="64" r="21" fill="#A3AAFF" stroke="#171928" stroke-width="7"/>
+</svg>

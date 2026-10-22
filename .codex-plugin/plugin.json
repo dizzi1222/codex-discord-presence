@@ -1,0 +1,22 @@
+{
+  "name": "codex-discord-presence",
+  "version": "0.1.0",
+  "description": "Local Discord Rich Presence for Codex, driven by lifecycle hooks with private defaults.",
+  "author": { "name": "dizzi1222", "url": "https://github.com/dizzi1222" },
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "extensions": {
+    "com.openai": { "onboardingSkill": "./skills/discord-presence/SKILL.md" }
+  },
+  "interface": {
+    "displayName": "Codex Discord Presence",
+    "shortDescription": "Tu actividad Codex en Discord",
+    "longDescription": "Muestra la actividad de Codex en Discord de escritorio mediante hooks y un proceso local. Incluye configuración guiada, estados de trabajo, reconexión y un modo que retira la presencia al terminar el turno para convivir con otras aplicaciones. Proyecto y modelo permanecen ocultos de forma predeterminada. Requiere Node.js 20 o posterior, Discord de escritorio y el Application ID de una aplicación de Discord propia. Los hooks deben revisarse y marcarse como confiables en Codex. Instalar el paquete desde la web no despliega el proceso local.",
+    "developerName": "dizzi1222",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": ["Configura Discord Presence para Codex con mi Application ID.", "Diagnostica por qué no aparece mi presencia de Codex en Discord."],
+    "logo": "./assets/logo.svg",
+    "composerIcon": "./assets/composer-icon.svg"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "codex-discord-presence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discord Rich Presence for Codex through local lifecycle hooks",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/cli.mjs start",
+    "doctor": "node src/cli.mjs doctor",
+    "package": "node scripts/package.mjs"
+  },
+  "license": "MIT",
+  "author": "dizzi1222",
+  "repository": "https://github.com/dizzi1222/codex-discord-presence"
+}

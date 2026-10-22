@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="Codex Presence: terminal y pulso">
+  <rect width="256" height="256" rx="56" fill="#171928"/>
+  <rect x="34" y="45" width="188" height="166" rx="24" fill="#262A46" stroke="#A3AAFF" stroke-width="8"/>
+  <path d="m65 91 25 23-25 23" fill="none" stroke="#F4F5FF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M106 142h26l16-34 19 66 14-32h18" fill="none" stroke="#63E6B4" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="199" cy="64" r="21" fill="#63E6B4" stroke="#171928" stroke-width="7"/>
+</svg>

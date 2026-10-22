@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+*.log
+*.zip
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+config.json
+daemon.json
+*.sock
