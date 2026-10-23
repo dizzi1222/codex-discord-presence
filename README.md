@@ -11,7 +11,7 @@ mi-proyecto · gpt-6.1-sol · Pensando  ← proyecto, modelo y estado
 00:12 transcurridos                  ← tiempo desde el inicio de la sesión
 ```
 
-El nombre principal de la tarjeta lo decide Discord a partir de tu Application ID. Crear una aplicación llamada **Codex** permite mostrar ese nombre; el complemento no puede renombrar una aplicación de otra persona.
+El nombre principal de la tarjeta lo decide Discord a partir del Application ID configurado. Este proyecto ofrece el Application ID público recomendado `1562598063074316398`, comprobado y funcional. Usarlo no comparte credenciales ni requiere crear un bot. Una aplicación propia sigue siendo opcional si quieres controlar el nombre principal y los assets administrados por Discord.
 
 ## Instalación
 
@@ -26,7 +26,7 @@ codex plugin marketplace add .
 codex plugin add codex-discord-presence@codex-presence
 ```
 
-Si descargas `codex-discord-presence-0.1.4.zip`, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
+Si descargas el ZIP de un release, extráelo, abre una terminal dentro de la carpeta `codex-discord-presence` y ejecuta los dos comandos `codex plugin` anteriores. El ZIP incluye el catálogo `.agents/plugins/marketplace.json` y el manifiesto local `.codex-plugin/plugin.json`.
 
 En el listado puedes ver dos fuentes: **Codex Discord Presence**, de la fuente local Codex Presence y autor dizzi1222, ejecuta la presencia en este equipo; **Codex Discord Presence (Guía)** es la copia de tu cuenta con las instrucciones. Son distribuciones de la misma integración, no una versión antigua y otra nueva. La presencia sólo requiere el runtime local.
 
@@ -41,19 +41,23 @@ El runtime usa el manifiesto local `.codex-plugin/plugin.json` para cargar `hook
 
 ## Configurar Discord
 
-1. Crea una aplicación en el [Discord Developer Portal](https://discord.com/developers/applications). Puedes llamarla **Codex**.
-2. Copia el **Application ID** de General Information. Es un identificador público, no un token. No necesitas crear un bot ni introducir tu contraseña o un token de usuario.
-3. Desde la carpeta del repositorio, ejecuta este comando sustituyendo el identificador:
+Cuando todavía no exista un Application ID configurado, la pregunta guiada debe ser:
+
+> ¿Deseas configurar el Application ID público recomendado de Codex Discord Presence (`1562598063074316398`)? Es un identificador público, no un token ni una credencial.
+
+Si aceptas, no necesitas escribir ni buscar el número. Desde la carpeta del repositorio ejecuta:
 
 ```sh
-node src/cli.mjs configure --client-id TU_APPLICATION_ID --show-project true --show-model true --language es
+node src/cli.mjs configure --client-id 1562598063074316398 --language es
 node src/cli.mjs doctor
 ```
 
-El ejemplo muestra el proyecto y el modelo. Si prefieres ocultarlos:
+No necesitas crear un bot ni introducir una contraseña, token de bot, token de usuario o API key de OpenAI. Si prefieres controlar el nombre principal y los assets de Discord, crea una aplicación en el [Discord Developer Portal](https://discord.com/developers/applications), copia su **Application ID** desde General Information y sustituye el ID público en el comando anterior.
+
+El proyecto, el modelo y el nombre de la sesión permanecen ocultos de forma predeterminada. Para mostrar proyecto y modelo:
 
 ```sh
-node src/cli.mjs configure --show-project false --show-model false
+node src/cli.mjs configure --show-project true --show-model true
 ```
 
 Para mostrar el nombre del chat actual en la primera línea, conservando proyecto y modelo en la segunda:
@@ -73,7 +77,9 @@ node src/cli.mjs start
 node src/cli.mjs status
 ```
 
-## Imagen de la tarjeta
+## Imágenes
+
+### Imagen de la tarjeta de Discord
 
 Las nuevas configuraciones incluyen el icono oficial de ChatGPT, un PNG de 1024 × 1024 copiado sin modificaciones del [OpenAI Help Center](https://help.openai.com/es-419/articles/7905742-what-does-the-official-chatgpt-ios-app-icon-look-like). Discord descarga `assets/chatgpt-official.png` mediante una URL HTTPS pública del repositorio y su proxy de imágenes; no necesita que subas el logo a tu aplicación. La ficha y su icono usan exactamente el logo original de terminal y pulso en `assets/listing-logo.png`; los SVG originales siguen incluidos. La fuente y atribución están en [assets](assets/README.md); el logotipo pertenece a OpenAI y este proyecto es independiente.
 
@@ -84,6 +90,12 @@ node src/cli.mjs configure --large-image https://raw.githubusercontent.com/dizzi
 ```
 
 `--large-image` también acepta la clave de un asset que hayas subido a tu aplicación en Discord o la URL pública de otra imagen. Un valor vacío desactiva la imagen. La imagen por defecto corresponde a `defaultLargeImage` en `src/config.mjs`; `assets/presence.png` conserva el icono propio como alternativa.
+
+### Logo de la ficha del plugin
+
+El logo de la ficha y el icono del compositor apuntan a `assets/listing-logo.png`. Para cambiarlos manualmente conservando las rutas actuales, reemplaza ese PNG por otro icono cuadrado y vuelve a publicar una versión del paquete. Si usas otro nombre de archivo, actualiza `interface.logo` y `interface.composerIcon` en `.codex-plugin/plugin.json`; en el paquete portable de la cuenta, actualiza `extensions.com.openai.interface.logo` y `extensions.com.openai.interface.composerIcon` en `plugin.json`.
+
+Editar una copia bajo la caché local de Codex no actualiza la ficha guardada en la cuenta. Esa copia requiere una nueva versión del mismo plugin mediante Plugin Creator. El logo de la ficha tampoco cambia `largeImage`, que pertenece a la tarjeta de actividad de Discord.
 
 ## Estados y convivencia
 
@@ -141,7 +153,7 @@ Para detenerlo manualmente, usa `node src/cli.mjs stop`. No es necesario cerrar 
 
 El repositorio y el ZIP de release incluyen el runtime local con `.codex-plugin/plugin.json`, los hooks y el catálogo de instalación de Codex. Se distribuyen sin `plugin.json` portable en la raíz para que la versión comprobada de Codex cargue los hooks. El paquete para guardar el complemento en una cuenta es independiente: usa el formato portable y excluye el marketplace, `.git` y los datos del usuario.
 
-Guardar el paquete con Plugin Creator en el workspace crea un plugin privado cuando hay un workspace activo. Para permitir acceso a otros miembros, utiliza los controles de compartir o publicar del workspace con los roles adecuados; la creación privada por sí sola no demuestra acceso para todos. Cada usuario necesita instalar el runtime local desde este repositorio o release y configurar su propia aplicación de Discord. Subir el paquete desde la web no despliega el proceso ni garantiza que sus hooks estén disponibles en Codex.
+Guardar el paquete con Plugin Creator en el workspace crea un plugin privado cuando hay un workspace activo. Para permitir acceso a otros miembros, utiliza los controles de compartir o publicar del workspace con los roles adecuados; la creación privada por sí sola no demuestra acceso para todos. Cada usuario necesita instalar el runtime local desde este repositorio o release y puede usar el Application ID público recomendado o una aplicación propia. Subir el paquete desde la web no despliega el proceso ni garantiza que sus hooks estén disponibles en Codex.
 
 Esta distribución en GitHub y workspace no equivale a publicar en el directorio público de OpenAI. La documentación actual reserva los plugins con hooks para instalación manual local y no admite esos hooks en el directorio público.
 

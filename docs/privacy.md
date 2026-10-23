@@ -17,7 +17,7 @@ Los hooks reciben los eventos de Codex por entrada estándar. El complemento sel
 
 `--show-session true` permite incluir el nombre de la sesión. Para obtenerlo, el complemento consulta los metadatos locales de la conversación con `thread/read` y `includeTurns: false`, y selecciona únicamente `thread.name`. No lee los turnos para construir un título ni usa `preview`, el primer prompt u otro contenido como alternativa. El nombre se limita y limpia antes de enviarlo a Discord. Un título elegido por el usuario puede contener información privada: esta opción sólo se activa cuando el usuario solicita mostrarlo.
 
-El nombre principal de la actividad lo determina la aplicación de Discord que corresponda al Application ID configurado. Ese identificador no es un token de autenticación. No introduzcas un token de bot o usuario, una contraseña ni una API key de OpenAI en su lugar.
+El nombre principal de la actividad lo determina la aplicación de Discord que corresponda al Application ID configurado. El ID público recomendado de este proyecto es `1562598063074316398`; compartirlo y usarlo no concede acceso a una cuenta ni a una aplicación de Discord. También puedes configurar el ID público de una aplicación propia. Ninguno de estos identificadores es un token de autenticación: no introduzcas un token de bot o usuario, una contraseña ni una API key de OpenAI en su lugar.
 
 ## Almacenamiento y control
 

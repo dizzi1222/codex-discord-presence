@@ -26,6 +26,14 @@ test('local release preserves runtime hook loading and contains an installable m
   assert.equal(entries.has(prefix + 'plugin.json'), false, 'portable manifests cause Codex to skip lifecycle hooks');
   const manifest = JSON.parse(entries.get(prefix + '.codex-plugin/plugin.json'));
   assert.equal(manifest.hooks, './hooks/hooks.json');
+  const publicClientId = '1562598063074316398';
+  const readme = entries.get(prefix + 'README.md').toString('utf8');
+  const skill = entries.get(prefix + 'skills/discord-presence/SKILL.md').toString('utf8');
+  assert.match(readme, new RegExp(publicClientId));
+  assert.match(skill, new RegExp(publicClientId));
+  assert.ok(manifest.interface.longDescription.includes(publicClientId));
+  assert.doesNotMatch(skill, /ask for the user's Discord Application ID/i);
+  assert.ok(manifest.interface.defaultPrompt.every(prompt => !/mi Application ID/i.test(prompt)));
   for (const key of ['logo', 'composerIcon']) {
     const path = manifest.interface[key];
     assert.match(path, /^\.\/assets\/[^/]+\.png$/, `${key} uses a portable raster listing image`);
