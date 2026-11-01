@@ -2,6 +2,13 @@
 
 ![Icono de Codex Discord Presence](assets/icon.svg)
 
+> Example config:
+<img width="1904" height="509" alt="image" src="https://github.com/user-attachments/assets/71fe1680-bcbe-4b06-b9eb-c95d286e600b" />
+
+```
+nvim /home/diego/.config/codex-discord-presence/config.json
+```
+
 Discord Rich Presence para Codex de escritorio y sesiones locales. Muestra cuándo Codex está trabajando, pensando o esperando tu siguiente mensaje; permite añadir el nombre del chat, el proyecto y el modelo. Node.js 20+, sin dependencias de ejecución ni compilación.
 
 ```text
